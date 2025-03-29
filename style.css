@@ -1,0 +1,307 @@
+:root {
+    --primary-bg: #000;
+    --modern-box-gradient: linear-gradient(135deg, rgba(20,20,20,0.8), rgba(40,40,40,0.8));
+}
+
+body {
+    background-color: var(--primary-bg);
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'Roboto', sans-serif;
+}
+
+#snow-canvas {
+    display: block;
+}
+
+#black-box {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 350px;
+    height: 350px;
+    background: linear-gradient(135deg, rgba(10,10,10,0.95), rgba(20,20,20,0.95));
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3),
+                0 0 30px rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.8s ease-out, boxGlow 4s infinite;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -45%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+@keyframes boxGlow {
+    0% {
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3),
+                    0 0 30px rgba(255, 255, 255, 0.05);
+    }
+    50% {
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3),
+                    0 0 40px rgba(255, 255, 255, 0.08);
+    }
+    100% {
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3),
+                    0 0 30px rgba(255, 255, 255, 0.05);
+    }
+}
+
+/* Updated profile container now inside the black box */
+#profile-container {
+    margin-top: 30px;
+    text-align: center;
+}
+
+#profile-pic {
+    width: 100px;
+    height: 100px;
+    border-radius: 150%;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4),
+                0 0 15px rgba(255, 255, 255, 0.1);
+    animation: glowPulse 3s infinite;
+}
+
+@keyframes glowPulse {
+    0% {
+        box-shadow: 0 4px 20px rgba(0,0,0,0.4),
+                    0 0 15px rgba(255, 255, 255, 0.1);
+    }
+    50% {
+        box-shadow: 0 4px 20px rgba(0,0,0,0.4),
+                    0 0 25px rgba(255, 255, 255, 0.15);
+    }
+    100% {
+        box-shadow: 0 4px 20px rgba(0,0,0,0.4),
+                    0 0 15px rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Updated style: ensure the username text does not overlap */
+#username {
+    position: relative;  /* Changed from absolute */
+    margin-top: 15px;   /* Add spacing between profile pic and username */
+    color: #fff;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* New modern music player styles */
+#music-player {
+    position: fixed;
+    bottom: 16px;
+    right: 10px;
+    width: 300px;
+    background: linear-gradient(45deg, rgba(20,20,20,0.9), rgba(40,40,40,0.9));
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: slideIn 0.6s ease-out;
+    transition: transform 0.3s ease;
+}
+
+#music-player:hover {
+    transform: translateY(-5px);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+#music-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+#song-picture {
+    width: 50px;
+    height: 50px;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+.song-details {
+    display: flex;
+    flex-direction: column;  /* Changed to column layout */
+    gap: 2px;               /* Reduced gap between elements */
+}
+
+#song-name {
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0;
+    line-height: 1.2;
+}
+
+#artist-name {
+    color: #474747;
+    font-size: 14px;
+    margin: 0;
+    line-height: 1.2;
+}
+
+#audio {
+    display: none; /* Hide default controls if desired */
+}
+
+/* New startup overlay styles */
+#startup-page {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(8px);
+    opacity: 1;
+}
+
+#startup-content {
+    text-align: center;
+    color: #fff;
+}
+
+#enter-button {
+    background: linear-gradient(45deg, #2b2b2b, #1a1a1a);
+    border: none;
+    padding: 12px 30px;
+    color: white;
+    border-radius: 6px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+#enter-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    background: linear-gradient(45deg, #323232, #202020);
+}
+
+#enter-button:active {
+    transform: translateY(0);
+}
+
+/* Styles for the visualizer lines */
+.visualizer {
+    margin-left: auto;
+    display: flex;
+    gap: 4px;
+    padding-right: 18px;
+    height: 11px; /* matches defaultHeight in JS */
+}
+
+.visualizer-line {
+    width: 5px;
+    height: 16px; /* matches defaultHeight in JS */
+    background-color: #474747;
+    border-radius: 2px;
+    transform-origin: center;
+}
+
+/* Updated portfolio styles */
+.portfolio-info {
+    margin-top: 15px;    /* Adjusted margin */
+    text-align: center;
+    animation: slideUp 0.6s ease-out 0.3s both;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.bio {
+    color: #808080;
+    font-size: 14px;
+    margin: 10px 0;
+}
+
+.social-links {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.social-link {
+    color: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: linear-gradient(45deg, rgba(40,40,40,0.5), rgba(60,60,60,0.5));
+}
+
+.social-link:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+    background: linear-gradient(45deg, rgba(60,60,60,0.5), rgba(80,80,80,0.5));
+}
+
+/* Credits section styles */
+#credits {
+    position: fixed;
+    bottom: 16px;
+    left: 16px;
+    color: #474747;
+    font-size: 14px;
+    z-index: 999;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+#credits:hover {
+    opacity: 1;
+}
+
+.heart {
+    color: #ff3366;
+    display: inline-block;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
