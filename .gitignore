@@ -1,1 +1,9 @@
-**/*.jpg
+# Specific media files
+assets/song-cover.jpg
+assets/song.mp3
+
+# Other media files
+*.jpg
+*.jpeg
+*.mp3
+*.webp
