@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unblocked Games</title>
+<style>
+	:root { color-scheme: dark; }
+	body {
+		margin: 0;
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 12px;
+		padding: 24px 16px;
+		background: #0a0a0c;
+		color: #d6d6db;
+		font: 14px/1.5 system-ui, sans-serif;
+	}
+	h1 { margin: 0; font-size: 20px; font-weight: 600; }
+	canvas {
+		width: 480px;
+		max-width: 100%;
+		aspect-ratio: 3 / 2;
+		background: #000;
+		image-rendering: pixelated;
+	}
+	#games {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		width: 480px;
+		max-width: 100%;
+		display: grid;
+		gap: 6px;
+	}
+	#games button {
+		width: 100%;
+		padding: 8px 10px;
+		background: #16161b;
+		color: inherit;
+		border: 1px solid #2a2a31;
+		border-radius: 4px;
+		font: inherit;
+		text-align: left;
+		cursor: pointer;
+	}
+	#games button:hover { border-color: #4a4a55; }
+	#status, #keys { margin: 0; color: #8b8b94; }
+</style>
+</head>
+<body>
+	<h1>Unblocked Games</h1>
+	<ul id="games" hidden></ul>
+	<canvas id="screen" width="480" height="320"></canvas>
+	<p id="status">No games installed</p>
+	<p id="keys">Controls: Arrow keys move &middot; Z = A &middot; X = B &middot; Enter = Start &middot; \ = Select &middot; A = L &middot; S = R</p>
+
+	<script src="emulator/util.js"></script>
+	<script src="emulator/core.js"></script>
+	<script src="emulator/arm.js"></script>
+	<script src="emulator/thumb.js"></script>
+	<script src="emulator/mmu.js"></script>
+	<script src="emulator/io.js"></script>
+	<script src="emulator/audio.js"></script>
+	<script src="emulator/video.js"></script>
+	<script src="emulator/video/proxy.js"></script>
+	<script src="emulator/video/software.js"></script>
+	<script src="emulator/irq.js"></script>
+	<script src="emulator/keypad.js"></script>
+	<script src="emulator/sio.js"></script>
+	<script src="emulator/savedata.js"></script>
+	<script src="emulator/gpio.js"></script>
+	<script src="emulator/gba.js"></script>
+
+	<script>
+	(function () {
+		var status = document.getElementById('status');
+		var canvas = document.getElementById('screen');
+		var gba;
+		var biosReady = false;
+		var pendingRom = null;
+
+		try {
+			gba = new GameBoyAdvance();
+			gba.keypad.eatInput = true;
+			gba.logLevel = gba.LOG_ERROR;
+			gba.setLogger(function (level, error) {
+				console.error(error);
+				status.textContent = 'Emulator error: ' + (error && error.message ? error.message : error);
+				gba.pause();
+			});
+			gba.setCanvas(canvas);
+		} catch (e) {
+			status.textContent = 'Emulator failed to start: ' + e;
+			return;
+		}
+
+		// The emulator renders 240x160 frames into a hidden canvas (gba.indirectCanvas)
+		// and calls video.drawCallback each frame. The default callback scales to the
+		// element's CSS size, which clips when the bitmap differs from the CSS size.
+		// Draw the full frame across the whole bitmap instead.
+		var targetContext = canvas.getContext('2d');
+		gba.video.drawCallback = function () {
+			if (gba.indirectCanvas) {
+				targetContext.drawImage(gba.indirectCanvas, 0, 0, canvas.width, canvas.height);
+			}
+		};
+
+		// Match the bitmap to the display size (x device pixel ratio) so the
+		// emulator output fills the screen exactly.
+		function fit() {
+			if (!gba.indirectCanvas) return; // canvas is exactly 240x160; emulator draws directly
+			var dpr = window.devicePixelRatio || 1;
+			canvas.width = Math.round(canvas.offsetWidth * dpr);
+			canvas.height = Math.round(canvas.offsetHeight * dpr);
+			targetContext.imageSmoothingEnabled = false;
+		}
+		fit();
+		window.addEventListener('resize', fit);
+
+		fetch('bios/gba_bios.bin')
+			.then(function (res) {
+				if (!res.ok) throw new Error('HTTP ' + res.status);
+				return res.arrayBuffer();
+			})
+			.then(function (bios) {
+				gba.setBios(bios);
+				biosReady = true;
+				if (pendingRom) {
+					startRom(pendingRom.buffer, pendingRom.name);
+					pendingRom = null;
+				}
+			})
+			.catch(function (e) {
+				status.textContent = 'Could not load BIOS: ' + e.message;
+			});
+
+		function startRom(buffer, name) {
+			if (!biosReady) {
+				pendingRom = { buffer: buffer, name: name };
+				status.textContent = 'Waiting for BIOS...';
+				return;
+			}
+			status.textContent = 'Loading ' + name + '...';
+			if (gba.setRom(buffer)) {
+				if (gba.audio.context) gba.audio.context.resume();
+				gba.runStable();
+				status.textContent = 'Playing: ' + name;
+			} else {
+				status.textContent = name + ' is not a valid GBA ROM';
+			}
+		}
+
+		// Games listed in roms/games.json: [{ "name": "Game Name", "file": "game.gba" }]
+		fetch('roms/games.json')
+			.then(function (res) { return res.ok ? res.json() : []; })
+			.then(function (games) {
+				if (!games || !games.length) return;
+				var list = document.getElementById('games');
+				games.forEach(function (game) {
+					var item = document.createElement('li');
+					var button = document.createElement('button');
+					button.textContent = game.name;
+					button.addEventListener('click', function () {
+						fetch('roms/' + game.file)
+							.then(function (res) {
+								if (!res.ok) throw new Error('HTTP ' + res.status);
+								return res.arrayBuffer();
+							})
+							.then(function (buffer) { startRom(buffer, game.name); })
+							.catch(function (e) {
+								status.textContent = 'Could not load ' + game.name + ': ' + e.message;
+							});
+					});
+					item.appendChild(button);
+					list.appendChild(item);
+				});
+				list.hidden = false;
+				status.textContent = 'Choose a game';
+			})
+			.catch(function () {});
+	})();
+	</script>
+</body>
+</html>

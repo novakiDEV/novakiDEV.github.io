@@ -1,0 +1,9 @@
+{
+	"name": "unblocked-games",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Minimal GBA emulator game site template. No games included.",
+	"scripts": {
+		"start": "node server.js"
+	}
+}
